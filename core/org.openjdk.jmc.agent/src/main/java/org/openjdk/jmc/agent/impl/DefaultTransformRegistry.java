@@ -133,6 +133,9 @@ public class DefaultTransformRegistry implements TransformRegistry {
 				streamReader.next();
 				if (streamReader.hasText()) {
 					String value = streamReader.getText();
+					if (value != null) {
+						value = value.trim();
+					}
 					values.put(name, value);
 				}
 			} else if (streamReader.isEndElement()) {
@@ -197,6 +200,9 @@ public class DefaultTransformRegistry implements TransformRegistry {
 				streamReader.next();
 				if (streamReader.hasText()) {
 					String value = streamReader.getText();
+					if (value != null) {
+						value = value.trim();
+					}
 					if ("name".equals(key)) { //$NON-NLS-1$
 						name = value;
 					} else if ("description".equals(key)) { //$NON-NLS-1$

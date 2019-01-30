@@ -42,9 +42,9 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Random;
 
-import org.openjdk.jmc.agent.test.InstrumentMe;
-
 public final class TestToolkit {
+	public static String DEFAULT_TEMPLATE_NAME = "jfrprobes_template.xml";
+	
 	public static final Random RND = new Random();
 
 	private TestToolkit() {
@@ -100,20 +100,13 @@ public final class TestToolkit {
 		return builder.toString();
 	}
 
-	public static InputStream getProbesXML(String testName) {
-		try {
-			String s = readTemplate();
-			s = s.replaceAll("%TEST_NAME%", testName); //$NON-NLS-1$
-			return new ByteArrayInputStream(s.getBytes());
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
+	public static InputStream getProbesXMLFromTemplate(String template, String testName) {
+		template = template.replaceAll("%TEST_NAME%", testName); //$NON-NLS-1$
+		return new ByteArrayInputStream(template.getBytes());
 	}
 
-	private static String readTemplate() throws IOException {
-		InputStream inputStream = InstrumentMe.class.getResourceAsStream("jfrprobes_template.xml"); //$NON-NLS-1$
+	public static String readTemplate(Class<?> resouceClass, String templateName) throws IOException {
+		InputStream inputStream = resouceClass.getResourceAsStream(templateName); // $NON-NLS-1$
 		String s = readString(inputStream);
 		closeSilently(inputStream);
 		return s;

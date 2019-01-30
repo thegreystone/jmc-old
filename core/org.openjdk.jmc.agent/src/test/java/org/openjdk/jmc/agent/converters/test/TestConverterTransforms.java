@@ -30,15 +30,34 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.openjdk.jmc.agent.test;
+package org.openjdk.jmc.agent.converters.test;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import org.openjdk.jmc.agent.converters.test.TestConverterTransforms;
+import static org.junit.Assert.assertTrue;
 
-@RunWith(Suite.class)
-@SuiteClasses({TestDefaultTransformRegistry.class, TestUtils.class, TestJFRTransformer.class, TestConverterTransforms.class})
+import java.io.IOException;
+import java.lang.instrument.IllegalClassFormatException;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class AllTests {
+import javax.xml.stream.XMLStreamException;
+
+import org.junit.Test;
+import org.objectweb.asm.Type;
+import org.openjdk.jmc.agent.TransformRegistry;
+import org.openjdk.jmc.agent.impl.DefaultTransformRegistry;
+import org.openjdk.jmc.agent.test.util.TestToolkit;
+
+public class TestConverterTransforms {
+	private static AtomicInteger runCount = new AtomicInteger(0);
+
+	public static String getTemplate() throws IOException {
+		return TestToolkit.readTemplate(TestConverterTransforms.class, TestToolkit.DEFAULT_TEMPLATE_NAME);
+	}
+
+	@Test
+	public void testRunConverterTransforms() throws XMLStreamException, IllegalClassFormatException, IOException {
+		TransformRegistry registry = DefaultTransformRegistry.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(),
+				"testRunConverterTransforms" + runCount.getAndIncrement())); //$NON-NLS-1$
+
+		assertTrue(registry.hasPendingTransforms(Type.getInternalName(InstrumentMeConverter.class)));
+	}
 }

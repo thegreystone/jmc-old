@@ -35,7 +35,7 @@ package org.openjdk.jmc.agent.test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
@@ -48,25 +48,30 @@ import org.openjdk.jmc.agent.impl.DefaultTransformRegistry;
 import org.openjdk.jmc.agent.test.util.TestToolkit;
 
 public class TestDefaultTransformRegistry {
+	
+	public static String getTemplate() throws IOException {
+		return TestToolkit.readTemplate(TestDefaultTransformRegistry.class, TestToolkit.DEFAULT_TEMPLATE_NAME);
+	}
+	
 	@Test
-	public void testHasPendingTransforms() throws FileNotFoundException, XMLStreamException {
+	public void testHasPendingTransforms() throws XMLStreamException, IOException {
 		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXML("HasPendingTransforms")); //$NON-NLS-1$
+				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "HasPendingTransforms")); //$NON-NLS-1$
 		assertNotNull(registry);
 		assertTrue(registry.hasPendingTransforms(Type.getInternalName(InstrumentMe.class)));
 	}
 
 	@Test
-	public void testFrom() throws FileNotFoundException, XMLStreamException {
+	public void testFrom() throws XMLStreamException, IOException {
 		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXML("From")); //$NON-NLS-1$
+				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "From")); //$NON-NLS-1$
 		assertNotNull(registry);
 	}
 
 	@Test
-	public void testGetTransformData() throws FileNotFoundException, XMLStreamException {
+	public void testGetTransformData() throws XMLStreamException, IOException {
 		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXML("GetTransformData")); //$NON-NLS-1$
+				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "GetTransformData")); //$NON-NLS-1$
 		assertNotNull(registry);
 		List<TransformDescriptor> transformData = registry.getTransformData(Type.getInternalName(InstrumentMe.class));
 		assertNotNull(transformData);
