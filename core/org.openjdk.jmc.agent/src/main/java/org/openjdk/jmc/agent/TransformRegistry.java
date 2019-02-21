@@ -56,7 +56,8 @@ public interface TransformRegistry {
 	/**
 	 * Retransforms classes according to the xml description.
 	 *
-	 * @param xmlDescription an XML snippet describing the wanted transformations.
+	 * @param xmlDescription
+	 *            an XML snippet describing the wanted transformations.
 	 * @return a class array
 	 */
 	// FIXME: We should only update the transformation registry! The actual retransforms should happen elsewhere!
