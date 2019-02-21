@@ -41,7 +41,7 @@
 		     method is badly implemented. Use with care. -->
 		<allowtostring>true</allowtostring>
 		<!-- Allows converters to be used. If a converter is badly implemented, you are on your own. -->
-		<allowconverters>true</allowconverters>		
+		<allowconverter>true</allowconverter>		
 	</config>
 	<events>
 		<event id="demo.jfr.test1">
