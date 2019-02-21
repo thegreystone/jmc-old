@@ -86,6 +86,7 @@ public class DefaultTransformRegistry implements TransformRegistry {
 					continue;
 				} else if (XML_ELEMENT_CONFIGURATION.equals(element.getLocalPart())) {
 					// These are the global defaults.
+					streamReader.next();
 					readGlobalConfig(streamReader, globalDefaults);
 				}
 			}
@@ -163,8 +164,9 @@ public class DefaultTransformRegistry implements TransformRegistry {
 		try {
 			while (streamReader.hasNext()) {
 				if (streamReader.isStartElement()) {
+					String key = streamReader.getName().getLocalPart();
+					streamReader.next();
 					if (streamReader.hasText()) {
-						String key = streamReader.getName().getLocalPart();
 						String value = streamReader.getText();
 						globalDefaults.put(key, value);
 					}
@@ -183,7 +185,10 @@ public class DefaultTransformRegistry implements TransformRegistry {
 
 	private static void addDefaults(HashMap<String, String> globalDefaults) {
 		globalDefaults.put(TransformDescriptor.ATTRIBUTE_CLASS_PREFIX, "__JFREvent"); //$NON-NLS-1$
-		globalDefaults.put(TransformDescriptor.ATTRIBUTE_ALLOW_TO_STRING, "true"); //$NON-NLS-1$
+		// For safety reasons, allowing toString is opt-in
+		globalDefaults.put(TransformDescriptor.ATTRIBUTE_ALLOW_TO_STRING, "false"); //$NON-NLS-1$
+		// For safety reasons, allowing converters is opt-in
+		globalDefaults.put(TransformDescriptor.ATTRIBUTE_ALLOW_CONVERTERS, "false"); //$NON-NLS-1$
 	}
 
 	private static Parameter parseParameter(int index, XMLStreamReader streamReader) throws XMLStreamException {
