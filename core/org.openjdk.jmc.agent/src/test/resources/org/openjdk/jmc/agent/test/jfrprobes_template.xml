@@ -194,48 +194,5 @@
 				</parameter>
 			</method>
 		</event>
-		<!-- 
-		<event id="demo.jfr.testC1">
-			<name>JFR Hello World Converter Event 1 %TEST_NAME%</name>
-			<description>Defined in the xml file and added by the agent. Should record the parameters.</description>
-			<path>demo/jfrhelloworldeventC1</path>
-			<kind>DURATION</kind>
-			<stacktrace>true</stacktrace>
-			<thread>true</thread>
-			<class>org.openjdk.jmc.agent.test.InstrumentMe</class>
-			<method>
-				<name>printInstanceHelloWorldJFR3</name>						
-				<descriptor>(Lorg/openjdk/jmc/bciagent/test/Gurka;)V</descriptor>
-				<parameter index="0">
-					<name>Gurka Attribute</name>
-					<description>The one and only converted Gurk-parameter</description>
-					<contenttype>None</contenttype>	
-					<converter>org.openjdk.jmc.agent.test.GurkConverterString</converter>
-				</parameter>
-			</method>
-		</event>
-		<event id="demo.jfr.testR1">
-			<name>JFR Hello World Reflective Access Event 1 %TEST_NAME%</name>
-			<description>Defined in the xml file and added by the agent. Should record the parameters.</description>
-			<path>demo/jfrhelloworldeventC1</path>
-			<kind>DURATION</kind>
-			<stacktrace>true</stacktrace>
-			<thread>true</thread>
-			<class>org.openjdk.jmc.agent.test.InstrumentMe</class>
-			<method>
-				<name>printInstanceHelloWorldJFR3</name>						
-				<descriptor>(Lorg/openjdk/jmc/bciagent/test/Gurka;)V</descriptor>
-				<parameter index="0">
-					<name>Gurka ID Attribute</name>
-					<description>The one and only converted Gurk-parameter</description>
-					<contenttype>None</contenttype>	
-					<fieldaccess>
-						<field>gurkID</field>
-						<type>I</type>
-					</fieldaccess>
-					<onlyonexception>false</onlyonexception>
-				</parameter>
-			</method>
-		</event> -->
 	</events>
 </jfragent>
