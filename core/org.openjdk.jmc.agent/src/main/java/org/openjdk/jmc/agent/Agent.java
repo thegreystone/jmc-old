@@ -101,7 +101,7 @@ public class Agent {
 			throws XMLStreamException {
 		TransformRegistry registry = DefaultTransformRegistry.from(configuration);
 		instrumentationInstance = instrumentation;
-		instrumentation.addTransformer(new Transformer(registry));
+		instrumentation.addTransformer(new Transformer(registry), true);
 		AgentManagementFactory.createAndRegisterAgentControllerMBean(instrumentation, registry);
 	}
 

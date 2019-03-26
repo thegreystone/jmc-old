@@ -33,10 +33,17 @@
 package org.openjdk.jmc.agent.jmx;
 
 import java.lang.instrument.Instrumentation;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.openjdk.jmc.agent.TransformDescriptor;
 import org.openjdk.jmc.agent.TransformRegistry;
 
 public class AgentController implements AgentControllerMBean {
+	
+	private static final Logger logger = Logger.getLogger(AgentController.class.getName());
+	
 	private final Instrumentation instrumentation;
 	private final TransformRegistry registry;
 
@@ -46,8 +53,22 @@ public class AgentController implements AgentControllerMBean {
 	}
 
 	@Override
-	public void retransformClasses(String xmlDescription) throws Exception {
-		Class<?>[] classes = registry.update(xmlDescription);
-		instrumentation.retransformClasses(classes);
+	public Class<?>[] retransformClasses(String xmlDescription) throws Exception {
+		// Update the transformation registry to keep things consistent.
+		List<TransformDescriptor> descriptors = registry.update(xmlDescription);
+		Class<?>[] classesToRetransform = new Class[descriptors.size()];
+		int i = 0;
+		// Collect the classes so we can retransform them in one go.
+		for (TransformDescriptor descriptor : descriptors) {
+			try {
+				Class<?> classToRetransform = Class.forName(descriptor.getClassName().replace('/', '.'));
+				classesToRetransform[i] = classToRetransform;
+				i++;
+			} catch (ClassNotFoundException cnfe) {
+				logger.log(Level.SEVERE, "Unable to find class: " + descriptor.getClassName(), cnfe);
+			}
+		}
+		instrumentation.retransformClasses((Class<?>[]) classesToRetransform);
+		return classesToRetransform;
 	}
 }

@@ -32,6 +32,7 @@
  */
 package org.openjdk.jmc.agent.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -48,6 +49,23 @@ import org.openjdk.jmc.agent.impl.DefaultTransformRegistry;
 import org.openjdk.jmc.agent.test.util.TestToolkit;
 
 public class TestDefaultTransformRegistry {
+	
+	private static final String XML_DESCRIPTION = "<jfragent>"
+			+ "<events>"
+			+ "<event id=\"testing.jfr.testI1\">"
+			+ "<name>Test For Retransform and Update</name>"
+			+ "<description>This is a test event.</description>"
+			+ "<path>demo/retransformEvent1</path>"
+			+ "<stacktrace>false</stacktrace>"
+			+ "<class>org.openjdk.jmc.agent.test.TestRetransform</class>"
+			+ "<method>"
+			+ "<name>test</name>"
+			+ "<descriptor>()V</descriptor>"
+			+ "</method>"
+			+ "<location>WRAP</location>"
+			+ "</event>"
+			+ "</events>"
+			+ "</jfragent>"; 
 	
 	public static String getTemplate() throws IOException {
 		return TestToolkit.readTemplate(TestDefaultTransformRegistry.class, TestToolkit.DEFAULT_TEMPLATE_NAME);
@@ -76,5 +94,17 @@ public class TestDefaultTransformRegistry {
 		List<TransformDescriptor> transformData = registry.getTransformData(Type.getInternalName(InstrumentMe.class));
 		assertNotNull(transformData);
 		assertTrue(transformData.size() > 0);
+	}
+	
+	@Test
+	public void testUpdate() throws XMLStreamException, IOException {
+		TransformRegistry registry = DefaultTransformRegistry
+				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "From")); //$NON-NLS-1$
+		assertNotNull(registry);
+		List<TransformDescriptor> descriptors = registry.update(XML_DESCRIPTION);
+		assertNotNull(descriptors);
+		assertEquals(descriptors.get(0).getClassName(), "org/openjdk/jmc/agent/test/TestRetransform");
+		assertEquals(descriptors.get(0).getMethod().toString(), "test()V");
+		assertTrue(registry.hasPendingTransforms("org/openjdk/jmc/agent/test/TestRetransform"));
 	}
 }
