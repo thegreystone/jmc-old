@@ -56,6 +56,7 @@ public class JFRTransformDescriptor extends TransformDescriptor {
 	private final String eventPath;
 	private final boolean recordStackTrace;
 	private final boolean allowToString;
+	private final boolean allowConverter;
 	private final List<Parameter> parameters;
 
 	public JFRTransformDescriptor(String id, String className, Method method,
@@ -67,7 +68,8 @@ public class JFRTransformDescriptor extends TransformDescriptor {
 		eventPath = initializeEventPath();
 		eventDescription = initializeEventDescription();
 		recordStackTrace = getBoolean(ATTRIBUTE_STACK_TRACE, true);
-		allowToString = getBoolean(ATTRIBUTE_ALLOW_TO_STRING, true);
+		allowToString = getBoolean(ATTRIBUTE_ALLOW_TO_STRING, false);
+		allowConverter = getBoolean(ATTRIBUTE_ALLOW_CONVERTER, false);
 		this.parameters = parameters;
 	}
 
@@ -97,6 +99,10 @@ public class JFRTransformDescriptor extends TransformDescriptor {
 
 	public boolean isAllowToString() {
 		return allowToString;
+	}
+	
+	public boolean isAllowConverter() {
+		return allowConverter;
 	}
 
 	private String initializeClassPrefix() {
