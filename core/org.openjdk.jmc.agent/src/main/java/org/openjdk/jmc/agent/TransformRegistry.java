@@ -34,6 +34,8 @@ package org.openjdk.jmc.agent;
 
 import java.util.List;
 
+import org.openjdk.jmc.agent.impl.DefaultTransformRegistry;
+
 public interface TransformRegistry {
 	/**
 	 * The named class has transforms that have not been executed yet.
@@ -54,12 +56,11 @@ public interface TransformRegistry {
 	List<TransformDescriptor> getTransformData(String className);
 
 	/**
-	 * Retransforms classes according to the xml description.
+	 * Updates the registry to reflect desired retransformation of classes according to the xml description.
 	 *
 	 * @param xmlDescription
 	 *            an XML snippet describing the wanted transformations.
-	 * @return a class array
+	 * @return a list of {@link TransformDescriptor}s corresponding to the wanted transformations.
 	 */
-	// FIXME: We should only update the transformation registry! The actual retransforms should happen elsewhere!
-	Class<?>[] update(String xmlDescription);
+	List<TransformDescriptor> update(String xmlDescription);
 }

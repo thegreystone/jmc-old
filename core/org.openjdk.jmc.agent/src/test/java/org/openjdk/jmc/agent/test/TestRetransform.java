@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2018, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2018, 2019 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2019, Red Hat Inc. All rights reserved.
  * 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
@@ -32,23 +33,26 @@
  */
 package org.openjdk.jmc.agent.test;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
-import java.util.List;
+import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
+import java.util.logging.Level;
 
-import javax.xml.stream.XMLStreamException;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import org.junit.Test;
-import org.objectweb.asm.Type;
-import org.openjdk.jmc.agent.TransformDescriptor;
-import org.openjdk.jmc.agent.TransformRegistry;
-import org.openjdk.jmc.agent.impl.DefaultTransformRegistry;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.util.CheckClassAdapter;
+import org.objectweb.asm.util.TraceClassVisitor;
+import org.openjdk.jmc.agent.Agent;
 import org.openjdk.jmc.agent.test.util.TestToolkit;
 
-public class TestDefaultTransformRegistry {
+public class TestRetransform {
+
+	private static final String AGENT_OBJECT_NAME = "org.openjdk.jmc.jfr.agent:type=AgentController"; //$NON-NLS-1$
+	private static final String TEST_CLASS = "org.openjdk.jmc.agent.test.TestRetransform";
 	
 	private static final String XML_DESCRIPTION = "<jfragent>"
 			+ "<events>"
@@ -66,45 +70,27 @@ public class TestDefaultTransformRegistry {
 			+ "</event>"
 			+ "</events>"
 			+ "</jfragent>"; 
-	
-	public static String getTemplate() throws IOException {
-		return TestToolkit.readTemplate(TestDefaultTransformRegistry.class, TestToolkit.DEFAULT_TEMPLATE_NAME);
-	}
-	
-	@Test
-	public void testHasPendingTransforms() throws XMLStreamException, IOException {
-		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "HasPendingTransforms")); //$NON-NLS-1$
-		assertNotNull(registry);
-		assertTrue(registry.hasPendingTransforms(Type.getInternalName(InstrumentMe.class)));
-	}
 
 	@Test
-	public void testFrom() throws XMLStreamException, IOException {
-		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "From")); //$NON-NLS-1$
-		assertNotNull(registry);
-	}
-
-	@Test
-	public void testGetTransformData() throws XMLStreamException, IOException {
-		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "GetTransformData")); //$NON-NLS-1$
-		assertNotNull(registry);
-		List<TransformDescriptor> transformData = registry.getTransformData(Type.getInternalName(InstrumentMe.class));
-		assertNotNull(transformData);
-		assertTrue(transformData.size() > 0);
+	public void testRetransform() throws Exception {
+		// Invoke retransform
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName name = new ObjectName(AGENT_OBJECT_NAME);
+		Object[] parameters = {XML_DESCRIPTION};
+		String[] signature = {String.class.getName()};
+		Class<?>[] clazzes = (Class<?>[]) mbs.invoke(name, "retransformClasses", parameters, signature);
+		assertNotNull(clazzes);
+		if (Agent.getLogger().isLoggable(Level.FINE)) {
+			for (Class<?> clazz : clazzes) {
+				// If we've asked for verbose information, we write the generated class
+				TraceClassVisitor visitor = new TraceClassVisitor(new PrintWriter(System.out));
+				CheckClassAdapter checkAdapter = new CheckClassAdapter(visitor);
+				ClassReader reader = new ClassReader(TestToolkit.getByteCode(clazz));
+			}
+		}
 	}
 	
-	@Test
-	public void testUpdate() throws XMLStreamException, IOException {
-		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "From")); //$NON-NLS-1$
-		assertNotNull(registry);
-		List<TransformDescriptor> descriptors = registry.update(XML_DESCRIPTION);
-		assertNotNull(descriptors);
-		assertEquals(descriptors.get(0).getClassName(), "org/openjdk/jmc/agent/test/TestRetransform");
-		assertEquals(descriptors.get(0).getMethod().toString(), "test()V");
-		assertTrue(registry.hasPendingTransforms("org/openjdk/jmc/agent/test/TestRetransform"));
+	public void test() {
+		//Dummy method for instrumentation
 	}
 }

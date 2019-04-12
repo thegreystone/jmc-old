@@ -33,12 +33,15 @@
 package org.openjdk.jmc.agent.impl;
 
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
@@ -58,7 +61,12 @@ public class DefaultTransformRegistry implements TransformRegistry {
 
 	// Global override section
 	private static final String XML_ELEMENT_CONFIGURATION = "config"; //$NON-NLS-1$
+	
+	// Logging
+	private static final Logger logger = Logger.getLogger("DefaultTransformRegistry");
 
+	// Maps class name -> Transform Descriptors
+	// First step in update should be to check if we even have transformations for the given class
 	private final HashMap<String, List<TransformDescriptor>> transformData = new HashMap<>();
 
 	@Override
@@ -299,10 +307,35 @@ public class DefaultTransformRegistry implements TransformRegistry {
 	}
 
 	@Override
-	public Class<?>[] update(String xmlDescription) {
-		// FIXME: Implement!
-//		ArrayList<Class<?>> classes = new ArrayList<>();
-		throw new UnsupportedOperationException("Not implemented yet!"); //$NON-NLS-1$
-//		return classes.toArray(new Class<?>[0]);
+	public List<TransformDescriptor> update(String xmlDescription) {
+		try  {
+			List<TransformDescriptor> tds = new ArrayList<TransformDescriptor>();
+			StringReader reader = new StringReader(xmlDescription);
+			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+			XMLStreamReader streamReader = inputFactory.createXMLStreamReader(reader);
+			HashMap<String, String> globalDefaults = new HashMap<String, String>();
+			logger.info(xmlDescription);
+			List<TransformDescriptor> retransformations = new ArrayList<TransformDescriptor>();
+			while (streamReader.hasNext()) {
+				if (streamReader.isStartElement()) {
+					QName element = streamReader.getName();
+					if (XML_ELEMENT_NAME_EVENT.equals(element.getLocalPart())) {
+						TransformDescriptor td = parseTransformData(streamReader, globalDefaults);
+						if (validate(td)) {
+							add(this, td);
+							tds.add(td);
+						}
+						continue;
+					} else if (XML_ELEMENT_CONFIGURATION.equals(element.getLocalPart())) {
+						readGlobalConfig(streamReader, globalDefaults);
+					}
+				}
+				streamReader.next();
+			}	
+			return tds;
+		} catch (XMLStreamException xse) {
+			logger.log(Level.SEVERE, "Failed to create XML Stream Reader", xse);
+			return null;
+		}
 	}
 }

@@ -75,7 +75,7 @@
 							<Automatic-Module-Name>org.openjdk.jmc.agent</Automatic-Module-Name>
 							<Agent-Class>org.openjdk.jmc.agent.Agent</Agent-Class>
 							<Premain-Class>org.openjdk.jmc.agent.Agent</Premain-Class>
-							<Can-Retransform-Classes>org.openjdk.jmc.agent.Agent</Can-Retransform-Classes>
+							<Can-Retransform-Classes>true</Can-Retransform-Classes>
 							<Bundle-RequiredExecutionEnvironment>JavaSE-1.7</Bundle-RequiredExecutionEnvironment>
 							<Built-By></Built-By>
 						</manifestEntries>
@@ -89,6 +89,26 @@
 				<configuration>
 					<argLine> --add-opens java.base/jdk.internal.misc=ALL-UNNAMED
 						-XX:+FlightRecorder</argLine>
+					<excludes>TestRetransform.java</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>3.0.0-M3</version>
+				<executions>
+          			<execution>
+            			<goals>
+              				<goal>integration-test</goal>
+              				<goal>verify</goal>
+            			</goals>
+          			</execution>
+        		</executions>
+				<configuration>
+					<argLine> --add-opens java.base/jdk.internal.misc=ALL-UNNAMED
+						-XX:+FlightRecorder -javaagent:target/org.openjdk.jmc.agent-1.0.0-SNAPSHOT.jar=target/test-classes/org/openjdk/jmc/agent/test/jfrprobes_template.xml
+						 -cp target/org.openjdk.jmc.agent-1.0.0-SNAPSHOT.jar:target/test-classes/ </argLine>
+					<includes>TestRetransform.java</includes>
 				</configuration>
 			</plugin>
 			<plugin>
