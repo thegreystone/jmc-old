@@ -33,6 +33,7 @@
 package org.openjdk.jmc.agent.jmx;
 
 import java.lang.instrument.Instrumentation;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,5 +71,45 @@ public class AgentController implements AgentControllerMBean {
 		}
 		instrumentation.retransformClasses((Class<?>[]) classesToRetransform);
 		return classesToRetransform;
+	}
+
+	public Class<?>[] revertToPreInstrumentation(String xmlDescription) throws Exception{
+		HashSet<Class<?>> classesToRetransform = new HashSet<Class<?>>();
+		boolean revertAll = xmlDescription == null ? true : (xmlDescription.isBlank() ? true : false);
+		if (revertAll) {
+			List<String> classNames = registry.clearAllTransformData();
+			for (String className : classNames ) {
+				try {
+					Class<?> classToRetransform = Class.forName(className.replace('/', '.'));
+					classesToRetransform.add(classToRetransform);
+				} catch (ClassNotFoundException cnfe) {
+					logger.log(Level.SEVERE, "Unable to find class: " + className, cnfe);
+				}
+			}
+
+		} else {
+			List<TransformDescriptor> descriptors = registry.replace(xmlDescription);
+			boolean noDescriptors = descriptors == null ? true : (descriptors.isEmpty() ? true : false);
+			if (noDescriptors) {
+				logger.log(Level.SEVERE, "Failed to identify transformations: " + xmlDescription);
+				return null;
+			}
+			for (TransformDescriptor descriptor : descriptors) {
+				try {
+					Class<?> classToRetransform = Class.forName(descriptor.getClassName().replace('/', '.'));
+					classesToRetransform.add(classToRetransform);
+				} catch (ClassNotFoundException cnfe) {
+					logger.log(Level.SEVERE, "Unable to find class: " + descriptor.getClassName(), cnfe);
+				}
+			}
+		}
+
+		Class<?>[] classesToRetransformArray = classesToRetransform.toArray(new Class<?>[0]);
+
+		registry.setRevertInstrumentation(true);
+		instrumentation.retransformClasses(classesToRetransformArray);
+		registry.setRevertInstrumentation(false);
+
+		return classesToRetransformArray;
 	}
 }

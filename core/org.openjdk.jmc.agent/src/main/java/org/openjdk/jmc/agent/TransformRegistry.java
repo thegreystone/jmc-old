@@ -61,4 +61,52 @@ public interface TransformRegistry {
 	 * @return a list of {@link TransformDescriptor}s corresponding to the wanted transformations.
 	 */
 	List<TransformDescriptor> update(String xmlDescription);
+
+	/**
+	 * Replaces class information in the registry according to the xml description.
+	 *
+	 * @param xmlDescription
+	 *           an XML snippet describing the wanted replacements.
+	 *
+	 * @return a list of {@link TransformDescriptor}s that replaced other class descriptors.
+	 */
+	List<TransformDescriptor> replace(String xmlDescription);
+
+	/**
+	 * Clears all classes and their corresponding transforms in the registry.
+	 *
+	 * @return the set of class names that were cleared.
+	 */
+	List<String> clearAllTransformData();
+
+	/**
+	 * Stores the pre instrumentation byte array of a class.
+	 * @param className
+	 *           the class for which to store the pre instrumentation data.
+	 * @param classPreInstrumentation
+	 *           the pre instrumentation byte array of the class to store.
+	 */
+	void storeClassPreInstrumentation(String className, byte[] classPreInstrumentation);
+
+	/**
+	 * Returns a byte array associated with a class pre instrumentation.
+	 * @param className
+	 *           the name of the class to get pre instrumentation data for.
+	 * @return a byte array of a class pre instrumentation.
+	 */
+	byte[] getClassPreInstrumentation(String className);
+
+	/**
+	 * Signify classes are or are not being reverted to their pre instrumentation versions.
+	 * @param shouldRevert
+	 *           true if want to signify classes are being reverted, false otherwise.
+	 */
+	void setRevertInstrumentation(boolean shouldRevert);
+
+	/**
+	 * Determines if classes should be reverted to their pre instrumentation versions.
+	 * @return true, if classes should be reverted and false otherwise.
+	 */
+	boolean isRevertIntrumentation();
+
 }

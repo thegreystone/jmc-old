@@ -33,5 +33,9 @@
 package org.openjdk.jmc.agent.jmx;
 
 public interface AgentControllerMBean {
+
 	public Class<?>[] retransformClasses(String xmlDescription) throws Exception;
+
+	public Class<?>[] revertToPreInstrumentation(String xmlDescription) throws Exception;
+
 }

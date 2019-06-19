@@ -25,6 +25,9 @@ Here is an example for running the example program with OpenJDK 11+:
 java --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -XX:+FlightRecorder -javaagent:target/org.openjdk.jmc.agent-1.0.0-SNAPSHOT.jar=target/test-classes/org/openjdk/jmc/agent/test/jfrprobes_template.xml -cp target/org.openjdk.jmc.agent-1.0.0-SNAPSHOT.jar:target/test-classes/ org.openjdk.jmc.agent.test.InstrumentMe
 ```
 
+## Interacting with the agent
+At runtime the agent can be used to revert the instrumentation of a method to a version prior to instrumenting.  By supplying the revertToPreInstrumentation function with a XML description of transformations to keep, all unlisted transformations will be reverted. Supplying an empty XML description will revert all instrumented methods to their preinstrumentation versions.
+
 ## Known Issues
 * The full converter support is still to be merged into the open source repo
 * Support for emitting an event only on exception has yet to be implemented
