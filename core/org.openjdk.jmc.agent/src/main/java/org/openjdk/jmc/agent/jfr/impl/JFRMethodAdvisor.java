@@ -32,6 +32,7 @@
  */
 package org.openjdk.jmc.agent.jfr.impl;
 
+import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -51,6 +52,11 @@ public class JFRMethodAdvisor extends AdviceAdapter {
 	private final Type eventType;
 	private int eventLocal = -1;
 
+	private Label tryBegin = new Label();
+	private Label tryEnd = new Label();
+
+	private boolean shouldInstrumentThrow;
+
 	protected JFRMethodAdvisor(JFRTransformDescriptor transformDescriptor, int api, MethodVisitor mv, int access,
 			String name, String desc) {
 		super(api, mv, access, name, desc);
@@ -59,7 +65,34 @@ public class JFRMethodAdvisor extends AdviceAdapter {
 		this.argumentTypesRef = Type.getArgumentTypes(desc);
 		this.returnTypeRef = Type.getReturnType(desc);
 		this.eventType = Type.getObjectType(transformDescriptor.getEventClassName());
+
+		this.shouldInstrumentThrow = !transformDescriptor.isUseRethrow(); // don't instrument inner throws is rethrow is enabled
 	}
+
+    @Override
+    public void visitCode() {
+        super.visitCode();
+
+		if (transformDescriptor.isUseRethrow()) {
+			visitLabel(tryBegin);
+		}
+    }
+
+    @Override
+    public void visitEnd() {
+		if (transformDescriptor.isUseRethrow()) {
+			visitLabel(tryEnd);
+			visitTryCatchBlock(tryBegin, tryEnd, tryEnd, "java/lang/Exception");
+
+			visitFrame(Opcodes.F_NEW, 0, null, 1, new Object[] {"java/lang/Exception"});
+
+			// Simply rethrow. Event commits are instrumented by onMethodExit()
+			shouldInstrumentThrow = true;
+			visitInsn(ATHROW);
+		}
+
+        super.visitEnd();
+    }
 
 	@Override
 	protected void onMethodEnter() {
@@ -97,6 +130,10 @@ public class JFRMethodAdvisor extends AdviceAdapter {
 
 	@Override
 	protected void onMethodExit(int opcode) {
+		if (opcode == ATHROW && !shouldInstrumentThrow) {
+			return;
+		}
+
 		if (returnTypeRef.getSort() != Type.VOID && opcode != ATHROW) {
 			Parameter returnParam = TypeUtils.findReturnParam(transformDescriptor.getParameters());
 			if (returnParam != null) {

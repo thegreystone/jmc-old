@@ -205,5 +205,40 @@
 				<descriptor>()V</descriptor>
 			</method>
 		</event>
+		<event id="demo.jfr.testI8">
+			<name>JFR Hello World Instance Event 8 %TEST_NAME%</name>
+			<description>Defined in the xml file and added by the agent. Should record even if an exception is raised.</description>
+			<path>demo/jfrhelloworldeventI8</path>
+			<stacktrace>true</stacktrace>
+			<class>org.openjdk.jmc.agent.test.InstrumentMe</class>
+			<method>
+				<name>printInstanceHelloWorldJFR8</name>
+				<descriptor>()V</descriptor>
+			</method>
+			<rethrow>true</rethrow>
+		</event>
+		<event id="demo.jfr.testI9">
+			<name>JFR Hello World Instance Event 9 %TEST_NAME%</name>
+			<description>Defined in the xml file and added by the agent. Should not record if an exception is raised.</description>
+			<path>demo/jfrhelloworldeventI9</path>
+			<stacktrace>true</stacktrace>
+			<class>org.openjdk.jmc.agent.test.InstrumentMe</class>
+			<method>
+				<name>printInstanceHelloWorldJFR9</name>
+				<descriptor>()V</descriptor>
+			</method>
+		</event>
+		<event id="demo.jfr.testI10">
+			<name>JFR Hello World Instance Event 10 %TEST_NAME%</name>
+			<description>Defined in the xml file and added by the agent. Should record even if an exception is raised, but should not overwrite the existing try-catch clause.</description>
+			<path>demo/jfrhelloworldeventI10</path>
+			<stacktrace>true</stacktrace>
+			<class>org.openjdk.jmc.agent.test.InstrumentMe</class>
+			<method>
+				<name>printInstanceHelloWorldJFR10</name>
+				<descriptor>()V</descriptor>
+			</method>
+			<rethrow>true</rethrow>
+		</event>
 	</events>
 </jfragent>

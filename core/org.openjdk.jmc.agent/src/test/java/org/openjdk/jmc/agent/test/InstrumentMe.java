@@ -77,6 +77,21 @@ public class InstrumentMe {
 		instance.printInstanceHelloWorldJFR5(createGurkList());
 		instance.printInstanceHelloWorldJFR6();
 		instance.printInstanceHelloWorldJFR7();
+		try {
+			instance.printInstanceHelloWorldJFR8();
+		} catch (RuntimeException e) {
+			System.out.println("#IJFR8. Caught a RuntimeException: " + e.getMessage());
+		}
+		try {
+			instance.printInstanceHelloWorldJFR9();
+		} catch (RuntimeException e) {
+			System.out.println("#IJFR9. Caught a RuntimeException: " + e.getMessage());
+		}
+		try {
+			instance.printInstanceHelloWorldJFR10();
+		} catch (RuntimeException e) {
+			System.out.println("#IJFR10. Caught a RuntimeException: " + e.getMessage());
+		}
 	}
 
 	private static void runStatic() throws InterruptedException {
@@ -93,6 +108,21 @@ public class InstrumentMe {
 		printHelloWorldJFR5(createGurkList());
 		printHelloWorldJFR6();
 		printHelloWorldJFR7();
+		try {
+			printHelloWorldJFR8();
+		} catch (RuntimeException e) {
+			System.out.println("#IJFR8. Caught a RuntimeException: " + e.getMessage());
+		}
+		try {
+			printHelloWorldJFR9();
+		} catch (RuntimeException e) {
+			System.out.println("#IJFR9. Caught a RuntimeException: " + e.getMessage());
+		}
+		try {
+			printHelloWorldJFR10();
+		} catch (RuntimeException e) {
+			System.out.println("#IJFR10. Caught a RuntimeException: " + e.getMessage());
+		}
 	}
 
 	private static Collection<Gurka> createGurkList() {
@@ -173,6 +203,30 @@ public class InstrumentMe {
 		}
 	}
 
+	public static void printHelloWorldJFR8() throws InterruptedException {
+		System.out.println("#IJFR8. About to throw a RuntimeException"); //$NON-NLS-1$
+		Thread.sleep(1000);
+		(new ArrayList<>()).get(1);
+	}
+
+	public static void printHelloWorldJFR9() throws InterruptedException {
+		System.out.println("#IJFR9. About to throw a RuntimeException"); //$NON-NLS-1$
+		Thread.sleep(1000);
+		(new ArrayList<>()).get(1);
+	}
+
+	public static void printHelloWorldJFR10() throws InterruptedException {
+		System.out.println("#IJFR10. About to throw a RuntimeException"); //$NON-NLS-1$
+		Thread.sleep(1000);
+
+		try {
+			(new ArrayList<>()).get(1);
+		} catch (RuntimeException e) {
+			System.out.println("#IJFR10. Caught a RuntimeException: " + e.getMessage()); //$NON-NLS-1$
+			throw e;
+		}
+	}
+
 	public void printInstanceHelloWorld1() throws InterruptedException {
 		System.out.println("#I1. Hello World!"); //$NON-NLS-1$
 		Thread.sleep(1000);
@@ -240,6 +294,30 @@ public class InstrumentMe {
 			Thread.sleep(1000);
 		} catch (Exception e) {
 			// intentionally empty
+		}
+	}
+
+	public void printInstanceHelloWorldJFR8() throws InterruptedException {
+		System.out.println("#IJFR8. About to throw a RuntimeException"); //$NON-NLS-1$
+		Thread.sleep(1000);
+		(new ArrayList<>()).get(1);
+	}
+
+	public void printInstanceHelloWorldJFR9() throws InterruptedException {
+		System.out.println("#IJFR9. About to throw a RuntimeException"); //$NON-NLS-1$
+		Thread.sleep(1000);
+		(new ArrayList<>()).get(1);
+	}
+
+	public void printInstanceHelloWorldJFR10() throws InterruptedException {
+		System.out.println("#IJFR10. About to throw a RuntimeException"); //$NON-NLS-1$
+		Thread.sleep(1000);
+
+		try {
+			(new ArrayList<>()).get(1);
+		} catch (RuntimeException e) {
+			System.out.println("#IJFR10. Caught a RuntimeException: " + e.getMessage()); //$NON-NLS-1$
+			throw e;
 		}
 	}
 }
