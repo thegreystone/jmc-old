@@ -194,5 +194,16 @@
 				</parameter>
 			</method>
 		</event>
+		<event id="demo.jfr.testI7">
+			<name>JFR Hello World Instance Event 7 %TEST_NAME%</name>
+			<description>Defined in the xml file and added by the agent. The original method contains a try-catch clause.</description>
+			<path>demo/jfrhelloworldeventI7</path>
+			<stacktrace>true</stacktrace>
+			<class>org.openjdk.jmc.agent.test.InstrumentMe</class>
+			<method>
+				<name>printInstanceHelloWorldJFR7</name>
+				<descriptor>()V</descriptor>
+			</method>
+		</event>
 	</events>
 </jfragent>
