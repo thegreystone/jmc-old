@@ -45,6 +45,8 @@ import org.openjdk.jmc.agent.util.TypeUtils;
  * Code emitter for JFR next, i.e. the version of JFR distributed with JDK 9 and later.
  */
 public class JFRNextMethodAdvisor extends AdviceAdapter {
+	private static final String THROWABLE_BINARY_NAME = "java/lang/Throwable"; //$NON-NLS-1$
+
 	private final JFRTransformDescriptor transformDescriptor;
 	private final Type[] argumentTypesRef;
 	private final Type returnTypeRef;
@@ -65,7 +67,7 @@ public class JFRNextMethodAdvisor extends AdviceAdapter {
 		this.returnTypeRef = Type.getReturnType(desc);
 		this.eventType = Type.getObjectType(transformDescriptor.getEventClassName());
 
-		this.shouldInstrumentThrow = !transformDescriptor.isUseRethrow(); // don't instrument inner throws is rethrow is enabled
+		this.shouldInstrumentThrow = !transformDescriptor.isUseRethrow(); // don't instrument inner throws if rethrow is enabled
 	}
 
 	@Override
@@ -81,9 +83,9 @@ public class JFRNextMethodAdvisor extends AdviceAdapter {
 	public void visitEnd() {
 		if (transformDescriptor.isUseRethrow()) {
 			visitLabel(tryEnd);
-			visitTryCatchBlock(tryBegin, tryEnd, tryEnd, "java/lang/Exception");
+			visitTryCatchBlock(tryBegin, tryEnd, tryEnd, THROWABLE_BINARY_NAME);
 
-			visitFrame(Opcodes.F_NEW, 0, null, 1, new Object[] {"java/lang/Exception"});
+			visitFrame(Opcodes.F_NEW, 0, null, 1, new Object[] {THROWABLE_BINARY_NAME});
 
 			// Simply rethrow. Event commits are instrumented by onMethodExit()
 			shouldInstrumentThrow = true;
