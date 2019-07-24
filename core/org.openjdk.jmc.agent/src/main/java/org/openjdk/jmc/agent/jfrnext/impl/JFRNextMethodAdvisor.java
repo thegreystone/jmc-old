@@ -33,6 +33,7 @@
 package org.openjdk.jmc.agent.jfrnext.impl;
 
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 import org.openjdk.jmc.agent.Parameter;
@@ -121,5 +122,11 @@ public class JFRNextMethodAdvisor extends AdviceAdapter {
 	private void commitEvent() {
 		mv.visitVarInsn(ALOAD, eventLocal);
 		mv.visitMethodInsn(INVOKEVIRTUAL, transformDescriptor.getEventClassName(), "commit", "()V", false); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	@Override
+	public void visitFrame(int type, int numLocal, Object[] local, int numStack, Object[] stack) {
+		// force to always use expanded frames
+		super.visitFrame(Opcodes.F_NEW, numLocal, local, numStack, stack);
 	}
 }

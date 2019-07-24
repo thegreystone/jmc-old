@@ -64,6 +64,7 @@ public class InstrumentMe {
 	}
 
 	private static void runInstance(InstrumentMe instance) throws InterruptedException {
+		System.out.println("Running instance versions..."); //$NON-NLS-1$
 		instance.printInstanceHelloWorld1();
 		instance.printInstanceHelloWorld2(TestToolkit.randomString(), TestToolkit.randomLong());
 		instance.printInstanceHelloWorld3(Gurka.createGurka());
@@ -75,6 +76,7 @@ public class InstrumentMe {
 		instance.printInstanceHelloWorldJFR4(new Gurka[] {Gurka.createGurka(), Gurka.createGurka()});
 		instance.printInstanceHelloWorldJFR5(createGurkList());
 		instance.printInstanceHelloWorldJFR6();
+		instance.printInstanceHelloWorldJFR7();
 	}
 
 	private static void runStatic() throws InterruptedException {
@@ -90,6 +92,7 @@ public class InstrumentMe {
 		printHelloWorldJFR4(new Gurka[] {Gurka.createGurka(), Gurka.createGurka()});
 		printHelloWorldJFR5(createGurkList());
 		printHelloWorldJFR6();
+		printHelloWorldJFR7();
 	}
 
 	private static Collection<Gurka> createGurkList() {
@@ -161,6 +164,15 @@ public class InstrumentMe {
 		return returnval;
 	}
 
+	public static void printHelloWorldJFR7() throws InterruptedException {
+		try {
+			System.out.println("#SJFR7. Hello World!"); //$NON-NLS-1$
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			// intentionally empty
+		}
+	}
+
 	public void printInstanceHelloWorld1() throws InterruptedException {
 		System.out.println("#I1. Hello World!"); //$NON-NLS-1$
 		Thread.sleep(1000);
@@ -220,5 +232,14 @@ public class InstrumentMe {
 		System.out.println(String.format("#IJFR6. retval:%1.3f", returnval)); //$NON-NLS-1$
 		Thread.sleep(1000);
 		return returnval;
+	}
+
+	public void printInstanceHelloWorldJFR7() throws InterruptedException {
+		try {
+			System.out.println("#IJFR7. Hello World!"); //$NON-NLS-1$
+			Thread.sleep(1000);
+		} catch (Exception e) {
+			// intentionally empty
+		}
 	}
 }
