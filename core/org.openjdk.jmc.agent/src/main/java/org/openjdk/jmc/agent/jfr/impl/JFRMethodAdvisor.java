@@ -71,7 +71,7 @@ public class JFRMethodAdvisor extends AdviceAdapter {
 
     @Override
     public void visitCode() {
-        super.visitCode();
+		super.visitCode();
 
 		if (transformDescriptor.isUseRethrow()) {
 			visitLabel(tryBegin);
@@ -91,7 +91,7 @@ public class JFRMethodAdvisor extends AdviceAdapter {
 			visitInsn(ATHROW);
 		}
 
-        super.visitEnd();
+		super.visitEnd();
     }
 
 	@Override
