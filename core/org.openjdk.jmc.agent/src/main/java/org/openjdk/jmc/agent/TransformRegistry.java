@@ -34,8 +34,6 @@ package org.openjdk.jmc.agent;
 
 import java.util.List;
 
-import org.openjdk.jmc.agent.impl.DefaultTransformRegistry;
-
 public interface TransformRegistry {
 	/**
 	 * The named class has transforms that have not been executed yet.
@@ -46,7 +44,7 @@ public interface TransformRegistry {
 	 */
 	boolean hasPendingTransforms(String className);
 
-	/**
+	/**O
 	 * Returns the list of {@link TransformDescriptor}s for the named class.
 	 *
 	 * @param className

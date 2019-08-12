@@ -50,9 +50,7 @@ import org.openjdk.jmc.agent.Agent;
 import org.openjdk.jmc.agent.test.util.TestToolkit;
 
 public class TestRetransform {
-
 	private static final String AGENT_OBJECT_NAME = "org.openjdk.jmc.jfr.agent:type=AgentController"; //$NON-NLS-1$
-	private static final String TEST_CLASS = "org.openjdk.jmc.agent.test.TestRetransform";
 	
 	private static final String XML_DESCRIPTION = "<jfragent>"
 			+ "<events>"
@@ -84,8 +82,8 @@ public class TestRetransform {
 			for (Class<?> clazz : clazzes) {
 				// If we've asked for verbose information, we write the generated class
 				TraceClassVisitor visitor = new TraceClassVisitor(new PrintWriter(System.out));
-				CheckClassAdapter checkAdapter = new CheckClassAdapter(visitor);
-				ClassReader reader = new ClassReader(TestToolkit.getByteCode(clazz));
+				new CheckClassAdapter(visitor);
+				new ClassReader(TestToolkit.getByteCode(clazz));
 			}
 		}
 	}

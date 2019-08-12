@@ -315,7 +315,6 @@ public class DefaultTransformRegistry implements TransformRegistry {
 			XMLStreamReader streamReader = inputFactory.createXMLStreamReader(reader);
 			HashMap<String, String> globalDefaults = new HashMap<String, String>();
 			logger.info(xmlDescription);
-			List<TransformDescriptor> retransformations = new ArrayList<TransformDescriptor>();
 			while (streamReader.hasNext()) {
 				if (streamReader.isStartElement()) {
 					QName element = streamReader.getName();
