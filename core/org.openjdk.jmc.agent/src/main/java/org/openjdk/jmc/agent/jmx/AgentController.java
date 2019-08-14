@@ -75,7 +75,7 @@ public class AgentController implements AgentControllerMBean {
 
 	public Class<?>[] revertToPreInstrumentation(String xmlDescription) throws Exception{
 		HashSet<Class<?>> classesToRetransform = new HashSet<Class<?>>();
-		boolean revertAll = xmlDescription == null ? true : xmlDescription.isBlank();
+		boolean revertAll = xmlDescription == null ? true : xmlDescription.isEmpty();
 		if (revertAll) {
 			List<String> classNames = registry.clearAllTransformData();
 			for (String className : classNames ) {
