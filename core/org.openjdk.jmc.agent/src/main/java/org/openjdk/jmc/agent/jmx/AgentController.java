@@ -75,7 +75,7 @@ public class AgentController implements AgentControllerMBean {
 
 	public Class<?>[] revertToPreInstrumentation(String xmlDescription) throws Exception{
 		HashSet<Class<?>> classesToRetransform = new HashSet<Class<?>>();
-		boolean revertAll = xmlDescription == null ? true : (xmlDescription.isBlank() ? true : false);
+		boolean revertAll = xmlDescription == null ? true : xmlDescription.isBlank();
 		if (revertAll) {
 			List<String> classNames = registry.clearAllTransformData();
 			for (String className : classNames ) {
@@ -89,7 +89,7 @@ public class AgentController implements AgentControllerMBean {
 
 		} else {
 			List<TransformDescriptor> descriptors = registry.replace(xmlDescription);
-			boolean noDescriptors = descriptors == null ? true : (descriptors.isEmpty() ? true : false);
+			boolean noDescriptors = descriptors == null ? true : descriptors.isEmpty();
 			if (noDescriptors) {
 				logger.log(Level.SEVERE, "Failed to identify transformations: " + xmlDescription);
 				return null;
