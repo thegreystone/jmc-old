@@ -324,39 +324,7 @@ public class DefaultTransformRegistry implements TransformRegistry {
 		return builder.toString();
 	}
 
-	@Override
-	public List<TransformDescriptor> update(String xmlDescription) {
-		try  {
-			List<TransformDescriptor> tds = new ArrayList<TransformDescriptor>();
-			StringReader reader = new StringReader(xmlDescription);
-			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
-			XMLStreamReader streamReader = inputFactory.createXMLStreamReader(reader);
-			HashMap<String, String> globalDefaults = new HashMap<String, String>();
-			logger.info(xmlDescription);
-			while (streamReader.hasNext()) {
-				if (streamReader.isStartElement()) {
-					QName element = streamReader.getName();
-					if (XML_ELEMENT_NAME_EVENT.equals(element.getLocalPart())) {
-						TransformDescriptor td = parseTransformData(streamReader, globalDefaults);
-						if (validate(this,td)) {
-							add(this, td);
-							tds.add(td);
-						}
-						continue;
-					} else if (XML_ELEMENT_CONFIGURATION.equals(element.getLocalPart())) {
-						readGlobalConfig(streamReader, globalDefaults);
-					}
-				}
-				streamReader.next();
-			}	
-			return tds;
-		} catch (XMLStreamException xse) {
-			logger.log(Level.SEVERE, "Failed to create XML Stream Reader", xse);
-			return null;
-		}
-	}
-
-	public List<TransformDescriptor> replace(String xmlDescription) {
+	public List<TransformDescriptor> modify(String xmlDescription) {
 		try  {
 			List<TransformDescriptor> tds = new ArrayList<TransformDescriptor>();
 			StringReader reader = new StringReader(xmlDescription);

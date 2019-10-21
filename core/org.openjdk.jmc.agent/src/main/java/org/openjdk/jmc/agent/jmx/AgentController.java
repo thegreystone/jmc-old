@@ -53,27 +53,7 @@ public class AgentController implements AgentControllerMBean {
 		this.registry = registry;
 	}
 
-	@Override
-	public Class<?>[] retransformClasses(String xmlDescription) throws Exception {
-		// Update the transformation registry to keep things consistent.
-		List<TransformDescriptor> descriptors = registry.update(xmlDescription);
-		Class<?>[] classesToRetransform = new Class[descriptors.size()];
-		int i = 0;
-		// Collect the classes so we can retransform them in one go.
-		for (TransformDescriptor descriptor : descriptors) {
-			try {
-				Class<?> classToRetransform = Class.forName(descriptor.getClassName().replace('/', '.'));
-				classesToRetransform[i] = classToRetransform;
-				i++;
-			} catch (ClassNotFoundException cnfe) {
-				logger.log(Level.SEVERE, "Unable to find class: " + descriptor.getClassName(), cnfe);
-			}
-		}
-		instrumentation.retransformClasses((Class<?>[]) classesToRetransform);
-		return classesToRetransform;
-	}
-
-	public Class<?>[] revertToPreInstrumentation(String xmlDescription) throws Exception{
+	public Class<?>[] setTransforms(String xmlDescription) throws Exception{
 		HashSet<Class<?>> classesToRetransform = new HashSet<Class<?>>();
 		boolean revertAll = xmlDescription == null ? true : xmlDescription.isEmpty();
 		if (revertAll) {
@@ -86,9 +66,8 @@ public class AgentController implements AgentControllerMBean {
 					logger.log(Level.SEVERE, "Unable to find class: " + className, cnfe);
 				}
 			}
-
 		} else {
-			List<TransformDescriptor> descriptors = registry.replace(xmlDescription);
+			List<TransformDescriptor> descriptors = registry.modify(xmlDescription);
 			boolean noDescriptors = descriptors == null ? true : descriptors.isEmpty();
 			if (noDescriptors) {
 				logger.log(Level.SEVERE, "Failed to identify transformations: " + xmlDescription);

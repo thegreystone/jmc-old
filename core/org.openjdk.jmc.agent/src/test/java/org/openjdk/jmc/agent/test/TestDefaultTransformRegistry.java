@@ -50,28 +50,9 @@ import org.openjdk.jmc.agent.impl.DefaultTransformRegistry;
 import org.openjdk.jmc.agent.test.util.TestToolkit;
 
 public class TestDefaultTransformRegistry {
-	
-	private static final String XML_DESCRIPTION_UPDATE = "<jfragent>"
-			+ "<events>"
-			+ "<event id=\"testing.jfr.testI1\">"
-			+ "<name>Test For Retransform and Update</name>"
-			+ "<description>This is a test event.</description>"
-			+ "<path>demo/retransformEvent1</path>"
-			+ "<stacktrace>false</stacktrace>"
-			+ "<class>org.openjdk.jmc.agent.test.TestRetransform</class>"
-			+ "<method>"
-			+ "<name>test</name>"
-			+ "<descriptor>()V</descriptor>"
-			+ "</method>"
-			+ "<location>WRAP</location>"
-			+ "</event>"
-			+ "</events>"
-			+ "</jfragent>";
 
-	private static final String XML_DESCRIPTION_REPLACE = "<jfragent>"
-			+ "<events>"
-			+ "<event id=\"demo.jfr.test1\">"
-			+ "<name>JFR Hello World Event 1 Replace </name>"
+	private static final String XML_EVENT_DESCRIPTION = "<event id=\"demo.jfr.test1\">"
+			+ "<name>JFR Hello World Event 1 Modify </name>"
 			+ "<description>Defined in the xml file and added by the agent.</description>"
 			+ "<path>demo/jfrhelloworldevent1</path>"
 			+ "<stacktrace>true</stacktrace>"
@@ -81,9 +62,7 @@ public class TestDefaultTransformRegistry {
 			+ "<descriptor>()V</descriptor>"
 			+ "</method>"
 			+ "<location>WRAP</location>"
-			+ "</event>"
-			+ "</events>"
-			+ "</jfragent>";
+			+ "</event>";
 	
 	public static String getTemplate() throws IOException {
 		return TestToolkit.readTemplate(TestDefaultTransformRegistry.class, TestToolkit.DEFAULT_TEMPLATE_NAME);
@@ -113,40 +92,29 @@ public class TestDefaultTransformRegistry {
 		assertNotNull(transformData);
 		assertTrue(transformData.size() > 0);
 	}
-	
-	@Test
-	public void testUpdate() throws XMLStreamException, IOException {
-		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "From")); //$NON-NLS-1$
-		assertNotNull(registry);
-		List<TransformDescriptor> descriptors = registry.update(XML_DESCRIPTION_UPDATE);
-		assertNotNull(descriptors);
-		assertEquals(descriptors.get(0).getClassName(), "org/openjdk/jmc/agent/test/TestRetransform");
-		assertEquals(descriptors.get(0).getMethod().toString(), "test()V");
-		assertTrue(registry.hasPendingTransforms("org/openjdk/jmc/agent/test/TestRetransform"));
-	}
 
 	@Test
-	public void testUpdateNameCollision() throws XMLStreamException, IOException {
+	public void testModify() throws XMLStreamException, IOException {
 		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "Replace")); //$NON-NLS-1$
+				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "Modify")); //$NON-NLS-1$
 		assertNotNull(registry);
-		List<TransformDescriptor> descriptors = registry.update(XML_DESCRIPTION_REPLACE);
-		assertNotNull(descriptors);
-		assertTrue(descriptors.isEmpty());
-	}
-
-	@Test
-	public void testReplace() throws XMLStreamException, IOException {
-		TransformRegistry registry = DefaultTransformRegistry
-				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "Replace")); //$NON-NLS-1$
-		assertNotNull(registry);
-		List<TransformDescriptor> descriptors = registry.replace(XML_DESCRIPTION_REPLACE);
+		List<TransformDescriptor> descriptors = registry.modify(getXMLDescription(XML_EVENT_DESCRIPTION));
 		assertNotNull(descriptors);
 		assertTrue(descriptors.size() == 1);
 		assertEquals(descriptors.get(0).getClassName(), "org/openjdk/jmc/agent/test/InstrumentMe");
 		assertEquals(descriptors.get(0).getMethod().toString(), "printHelloWorldJFR1()V");
 		assertTrue(registry.hasPendingTransforms("org/openjdk/jmc/agent/test/InstrumentMe"));
+	}
+
+	@Test
+	public void testModifyNameCollision() throws XMLStreamException, IOException {
+		TransformRegistry registry = DefaultTransformRegistry
+				.from(TestToolkit.getProbesXMLFromTemplate(getTemplate(), "Modify")); //$NON-NLS-1$
+		assertNotNull(registry);
+		final String collisionDescirption = getXMLDescription(XML_EVENT_DESCRIPTION.concat(XML_EVENT_DESCRIPTION));
+		List<TransformDescriptor> descriptors = registry.modify(collisionDescirption);
+		assertNotNull(descriptors);
+		assertTrue(descriptors.size() == 1);
 	}
 
 	@Test
@@ -157,6 +125,10 @@ public class TestDefaultTransformRegistry {
 		List<String> classesCleared = registry.clearAllTransformData();
 		assertEquals(classesCleared.get(0),Type.getInternalName(InstrumentMe.class));
 		assertNull(registry.getTransformData(Type.getInternalName(InstrumentMe.class)));
+	}
+
+	private String getXMLDescription(String eventsDescription) {
+		return "<jfragent><events>".concat(eventsDescription).concat("</events></jfragent>");
 	}
 
 }

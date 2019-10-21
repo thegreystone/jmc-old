@@ -49,7 +49,7 @@ import org.objectweb.asm.util.TraceClassVisitor;
 import org.openjdk.jmc.agent.Agent;
 import org.openjdk.jmc.agent.test.util.TestToolkit;
 
-public class TestRevertInstrumentation {
+public class TestSetTransforms {
 
 	private static final String AGENT_OBJECT_NAME = "org.openjdk.jmc.jfr.agent:type=AgentController"; //$NON-NLS-1$
 
@@ -71,39 +71,39 @@ public class TestRevertInstrumentation {
 			+ "</jfragent>";
 
 	@Test
-	public void testRevertMethodToPreInstrumentation() throws Exception {
+	public void testSetTransforms() throws Exception {
 		// Invoke retransform
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		ObjectName name = new ObjectName(AGENT_OBJECT_NAME);
 		Object[] parameters = {XML_DESCRIPTION};
 		String[] signature = {String.class.getName()};
-		Class<?>[] clazzes = (Class<?>[]) mbs.invoke(name, "revertToPreInstrumentation", parameters, signature);
+		Class<?>[] clazzes = (Class<?>[]) mbs.invoke(name, "setTransforms", parameters, signature);
 		assertNotNull(clazzes);
 		if (Agent.getLogger().isLoggable(Level.FINE)) {
 			for (Class<?> clazz : clazzes) {
 				// If we've asked for verbose information, we write the generated class
 				TraceClassVisitor visitor = new TraceClassVisitor(new PrintWriter(System.out));
-				CheckClassAdapter checkAdapter = new CheckClassAdapter(visitor);
-				ClassReader reader = new ClassReader(TestToolkit.getByteCode(clazz));
+				new CheckClassAdapter(visitor);
+				new ClassReader(TestToolkit.getByteCode(clazz));
 			}
 		}
 	}
 
 	@Test
-	public void testRevertAllToPreInstrumentation() throws Exception {
+	public void testClearAllTransforms() throws Exception {
 		// Invoke retransform
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		ObjectName name = new ObjectName(AGENT_OBJECT_NAME);
 		Object[] parameters = {""};
 		String[] signature = {String.class.getName()};
-		Class<?>[] clazzes = (Class<?>[]) mbs.invoke(name, "revertToPreInstrumentation", parameters, signature);
+		Class<?>[] clazzes = (Class<?>[]) mbs.invoke(name, "setTransforms", parameters, signature);
 		assertNotNull(clazzes);
 		if (Agent.getLogger().isLoggable(Level.FINE)) {
 			for (Class<?> clazz : clazzes) {
 				// If we've asked for verbose information, we write the generated class
 				TraceClassVisitor visitor = new TraceClassVisitor(new PrintWriter(System.out));
-				CheckClassAdapter checkAdapter = new CheckClassAdapter(visitor);
-				ClassReader reader = new ClassReader(TestToolkit.getByteCode(clazz));
+				new CheckClassAdapter(visitor);
+				new ClassReader(TestToolkit.getByteCode(clazz));
 			}
 		}
 	}

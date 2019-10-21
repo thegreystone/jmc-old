@@ -54,23 +54,14 @@ public interface TransformRegistry {
 	List<TransformDescriptor> getTransformData(String className);
 
 	/**
-	 * Updates the registry to reflect desired retransformation of classes according to the xml description.
+	 * Modifies class information in the registry according to the xml description.
 	 *
 	 * @param xmlDescription
-	 *            an XML snippet describing the wanted transformations.
+	 *           an XML snippet describing the wanted modifications.
+	 *
 	 * @return a list of {@link TransformDescriptor}s corresponding to the wanted transformations.
 	 */
-	List<TransformDescriptor> update(String xmlDescription);
-
-	/**
-	 * Replaces class information in the registry according to the xml description.
-	 *
-	 * @param xmlDescription
-	 *           an XML snippet describing the wanted replacements.
-	 *
-	 * @return a list of {@link TransformDescriptor}s that replaced other class descriptors.
-	 */
-	List<TransformDescriptor> replace(String xmlDescription);
+	List<TransformDescriptor> modify(String xmlDescription);
 
 	/**
 	 * Clears all classes and their corresponding transforms in the registry.
@@ -99,7 +90,7 @@ public interface TransformRegistry {
 	/**
 	 * Signify classes are or are not being reverted to their pre instrumentation versions.
 	 * @param shouldRevert
-	 *           true if want to signify classes are being reverted, false otherwise.
+	 *           true if class instrumentation should be reverted, false otherwise.
 	 */
 	void setRevertInstrumentation(boolean shouldRevert);
 
