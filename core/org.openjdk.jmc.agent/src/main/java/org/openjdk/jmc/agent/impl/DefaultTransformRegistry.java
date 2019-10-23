@@ -52,6 +52,7 @@ import org.openjdk.jmc.agent.Method;
 import org.openjdk.jmc.agent.Parameter;
 import org.openjdk.jmc.agent.TransformDescriptor;
 import org.openjdk.jmc.agent.TransformRegistry;
+import org.openjdk.jmc.agent.jfr.JFRTransformDescriptor;
 
 public class DefaultTransformRegistry implements TransformRegistry {
 	private static final String XML_ATTRIBUTE_NAME_ID = "id"; //$NON-NLS-1$
@@ -68,6 +69,10 @@ public class DefaultTransformRegistry implements TransformRegistry {
 	// Maps class name -> Transform Descriptors
 	// First step in update should be to check if we even have transformations for the given class
 	private final HashMap<String, List<TransformDescriptor>> transformData = new HashMap<>();
+
+	// Maps class name -> pre instrumentation version of a class
+	private final HashMap<String, byte[]> preInstrumentedClasses = new HashMap<>();
+	private volatile boolean revertInstrumentation = false;
 
 	@Override
 	public boolean hasPendingTransforms(String className) {
@@ -88,7 +93,7 @@ public class DefaultTransformRegistry implements TransformRegistry {
 				QName element = streamReader.getName();
 				if (XML_ELEMENT_NAME_EVENT.equals(element.getLocalPart())) {
 					TransformDescriptor td = parseTransformData(streamReader, globalDefaults);
-					if (validate(td)) {
+					if (validate(registry,td)) {
 						add(registry, td);
 					}
 					continue;
@@ -112,7 +117,7 @@ public class DefaultTransformRegistry implements TransformRegistry {
 		transformDataList.add(td);
 	}
 
-	private static boolean validate(TransformDescriptor td) {
+	private static boolean validate(DefaultTransformRegistry registry, TransformDescriptor td) {
 		if (td.getClassName() == null) {
 			System.err.println("Encountered probe without associated class! Check probe definitions!"); //$NON-NLS-1$
 			return false;
@@ -120,6 +125,19 @@ public class DefaultTransformRegistry implements TransformRegistry {
 		if (td.getId() == null) {
 			System.err.println("Encountered probe without associated id! Check probe definitions!"); //$NON-NLS-1$
 			return false;
+		}
+
+		List<TransformDescriptor> transformDataList = registry.getTransformData(td.getClassName());
+		if (transformDataList != null) {
+			String tdEventClassName = ((JFRTransformDescriptor)td).getEventClassName();
+			for (TransformDescriptor tdListEntry : transformDataList) {
+				String existingName = ((JFRTransformDescriptor) tdListEntry).getEventClassName();
+				if (existingName.equals(tdEventClassName)) {
+					System.err.println("Encountered probe with an event class name that already exists. "
+							+ "Check probe definitions!"); //$NON-NLS-1$
+					return false;
+				}
+			}
 		}
 
 		return true;
@@ -306,21 +324,25 @@ public class DefaultTransformRegistry implements TransformRegistry {
 		return builder.toString();
 	}
 
-	@Override
-	public List<TransformDescriptor> update(String xmlDescription) {
+	public List<TransformDescriptor> modify(String xmlDescription) {
 		try  {
 			List<TransformDescriptor> tds = new ArrayList<TransformDescriptor>();
 			StringReader reader = new StringReader(xmlDescription);
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 			XMLStreamReader streamReader = inputFactory.createXMLStreamReader(reader);
 			HashMap<String, String> globalDefaults = new HashMap<String, String>();
+			List<String> removedOldClasses = new ArrayList<String>();
 			logger.info(xmlDescription);
 			while (streamReader.hasNext()) {
 				if (streamReader.isStartElement()) {
 					QName element = streamReader.getName();
 					if (XML_ELEMENT_NAME_EVENT.equals(element.getLocalPart())) {
 						TransformDescriptor td = parseTransformData(streamReader, globalDefaults);
-						if (validate(td)) {
+						if(!removedOldClasses.contains(td.getClassName())) {
+							transformData.remove(td.getClassName());
+							removedOldClasses.add(td.getClassName());
+						}
+						if (validate(this,td)) {
 							add(this, td);
 							tds.add(td);
 						}
@@ -330,11 +352,36 @@ public class DefaultTransformRegistry implements TransformRegistry {
 					}
 				}
 				streamReader.next();
-			}	
+			}
 			return tds;
 		} catch (XMLStreamException xse) {
 			logger.log(Level.SEVERE, "Failed to create XML Stream Reader", xse);
 			return null;
 		}
 	}
+
+	public List<String> clearAllTransformData() {
+		List<String> classNames = new ArrayList<>(transformData.keySet());
+		transformData.clear();
+		return classNames;
+	}
+
+	public void storeClassPreInstrumentation(String className, byte[] classPreInstrumentation) {
+		if(!preInstrumentedClasses.containsKey(className)) {
+			preInstrumentedClasses.put(className, classPreInstrumentation.clone());
+		}
+	}
+
+	public byte[] getClassPreInstrumentation(String className) {
+		return preInstrumentedClasses.get(className);
+	}
+
+	public void setRevertInstrumentation(boolean shouldRevert) {
+		this.revertInstrumentation = shouldRevert;
+	}
+
+	public boolean isRevertIntrumentation() {
+		return revertInstrumentation;
+	}
+
 }

@@ -49,34 +49,35 @@ import org.objectweb.asm.util.TraceClassVisitor;
 import org.openjdk.jmc.agent.Agent;
 import org.openjdk.jmc.agent.test.util.TestToolkit;
 
-public class TestRetransform {
+public class TestSetTransforms {
+
 	private static final String AGENT_OBJECT_NAME = "org.openjdk.jmc.jfr.agent:type=AgentController"; //$NON-NLS-1$
-	
+
 	private static final String XML_DESCRIPTION = "<jfragent>"
 			+ "<events>"
-			+ "<event id=\"testing.jfr.testI1\">"
-			+ "<name>Test For Retransform and Update</name>"
-			+ "<description>This is a test event.</description>"
-			+ "<path>demo/retransformEvent1</path>"
-			+ "<stacktrace>false</stacktrace>"
-			+ "<class>org.openjdk.jmc.agent.test.TestRetransform</class>"
+			+ "<event id=\"demo.jfr.test1\">"
+			+ "<name>JFR Hello World Event 1 %TEST_NAME%</name>"
+			+ "<description>Defined in the xml file and added by the agent.</description>"
+			+ "<path>demo/jfrhelloworldevent1</path>"
+			+ "<stacktrace>true</stacktrace>"
+			+ "<class>org.openjdk.jmc.agent.test.InstrumentMe</class>"
 			+ "<method>"
-			+ "<name>test</name>"
+			+ "<name>printHelloWorldJFR1</name>"
 			+ "<descriptor>()V</descriptor>"
 			+ "</method>"
 			+ "<location>WRAP</location>"
 			+ "</event>"
 			+ "</events>"
-			+ "</jfragent>"; 
+			+ "</jfragent>";
 
 	@Test
-	public void testRetransform() throws Exception {
+	public void testSetTransforms() throws Exception {
 		// Invoke retransform
 		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
 		ObjectName name = new ObjectName(AGENT_OBJECT_NAME);
 		Object[] parameters = {XML_DESCRIPTION};
 		String[] signature = {String.class.getName()};
-		Class<?>[] clazzes = (Class<?>[]) mbs.invoke(name, "retransformClasses", parameters, signature);
+		Class<?>[] clazzes = (Class<?>[]) mbs.invoke(name, "setTransforms", parameters, signature);
 		assertNotNull(clazzes);
 		if (Agent.getLogger().isLoggable(Level.FINE)) {
 			for (Class<?> clazz : clazzes) {
@@ -87,7 +88,26 @@ public class TestRetransform {
 			}
 		}
 	}
-	
+
+	@Test
+	public void testClearAllTransforms() throws Exception {
+		// Invoke retransform
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName name = new ObjectName(AGENT_OBJECT_NAME);
+		Object[] parameters = {""};
+		String[] signature = {String.class.getName()};
+		Class<?>[] clazzes = (Class<?>[]) mbs.invoke(name, "setTransforms", parameters, signature);
+		assertNotNull(clazzes);
+		if (Agent.getLogger().isLoggable(Level.FINE)) {
+			for (Class<?> clazz : clazzes) {
+				// If we've asked for verbose information, we write the generated class
+				TraceClassVisitor visitor = new TraceClassVisitor(new PrintWriter(System.out));
+				new CheckClassAdapter(visitor);
+				new ClassReader(TestToolkit.getByteCode(clazz));
+			}
+		}
+	}
+
 	public void test() {
 		//Dummy method for instrumentation
 	}
