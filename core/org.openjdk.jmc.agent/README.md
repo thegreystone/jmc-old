@@ -26,7 +26,7 @@ java --add-opens java.base/jdk.internal.misc=ALL-UNNAMED -XX:+FlightRecorder -ja
 ```
 
 ## Interacting with the agent
-At runtime the agent can be used to revert the instrumentation of a method to a version prior to instrumenting.  By supplying the revertToPreInstrumentation function with a XML description of transformations to keep, all unlisted transformations will be reverted. Supplying an empty XML description will revert all instrumented methods to their preinstrumentation versions.
+At runtime the agent can be used to modify the transformed state of a class. To specify a desired state, supply the setTransforms function with a XML description of transformations to keep or modify, and leave out all those that should be reverted to their preinstrumentation versions.
 
 ## Known Issues
 * The full converter support is still to be merged into the open source repo
